@@ -83,8 +83,21 @@ eval env e = case e of
 				VList nt <- eval env (EList t)
 				nh <- eval env h
 				return $ VList (nh:nt)
-	EEmptyList -> return $ VList []				
+	EEmptyList -> return $ VList []			
+	EEmptyTuple -> return $ VTuple Nothing Nothing
+	ETuple exps -> case exps of
+		[] -> return $ VTuple Nothing Nothing
+		h:t -> do
+			rt <- eval env (ETuple t)
+			rh <- eval env h
+			return $ VTuple (Just rh) (Just rt)
 	EInt n -> return $ VInt n
+
+
+
+
+
+
 
 
 

@@ -1,1 +1,1 @@
-bnfc -m Funk.cf ; make
+bnfc -m Funk.cf ; make ; python runtest.py

@@ -13,6 +13,8 @@ ELet.		Exp ::= "let" Decl "in" Exp ;
 ECase.		Exp1 ::= "case" Exp "of" [Patt] ;
 EList.		Exp2 ::= "[" [Exp2] "]" ;
 EEmptyList.	Exp2 ::= "[]" ;
+EEmptyTuple.	Exp2 ::= "()" ;
+ETuple.		Exp2 ::= "(" [Exp2] ")" ; 
 EInt.		Exp3 ::= Integer ;
 
 Pattern.	Patt ::= Match "->" Exp;
