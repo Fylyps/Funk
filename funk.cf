@@ -1,0 +1,18 @@
+-- Funk language grammar.
+
+comment "//" ;
+comment "/*" "*/" ;
+
+Program.	Prog ::= [Decl] "eval" Exp ;
+
+Declaration.	Decl ::= Ident [Ident] "be" Exp ;
+
+EApplication.	Exp ::= Ident [Exp] ;
+ELet.		Exp ::= "let" Decl "in" Exp ;
+EInt.		Exp1 ::= Integer ;
+
+coercions Exp 1 ;
+
+separator Ident "" ;
+separator Decl ";" ;
+separator Exp "" ;
