@@ -40,3 +40,6 @@
 /.runtest.py.swp
 /SkelFunk.hs.bak
 /TestFunk.hs.bak
+/.ErrM.hs.swp
+/.FunkStdLib.hs.swp
+/.Model.hs.swp
