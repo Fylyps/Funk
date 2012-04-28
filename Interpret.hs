@@ -13,5 +13,7 @@ main = do
 
 calc s =
 	case pProg (myLexer s) of
-		Ok p -> show $ run p 
-		e -> show e
+		Ok p -> let out = run p in case out of
+			Ok out -> show out
+			Bad err -> show $ "RUN ERROR: " ++ err
+		Bad e -> show $ "PARSE ERROR: " ++  e

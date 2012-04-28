@@ -12,9 +12,10 @@ EApplication.	Exp ::= "(" Ident [Exp] ")" ;
 ELet.		Exp ::= "let" Decl "in" Exp ;
 ECase.		Exp1 ::= "case" Exp "of" [Patt] ;
 EList.		Exp2 ::= "[" [Exp2] "]" ;
+EEmptyList.	Exp2 ::= "[]" ;
 EInt.		Exp3 ::= Integer ;
 
-PattGet.	Patt ::= Match "->" Exp;
+Pattern.	Patt ::= Match "->" Exp;
 
 MatchEmpList.	Match ::= "[]" ;
 MatchHeadTail.	Match ::=  Ident "::" Ident ;
