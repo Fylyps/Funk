@@ -1,4 +1,4 @@
 id x y  z be z 
 
-eval
-let x be 1 in id 1 2 3
+main
+let x be 1 in (id 1 2 3)

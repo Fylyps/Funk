@@ -1,3 +1,5 @@
 k be 1; 
-eval
+
+main
+
 let x be 8 in k

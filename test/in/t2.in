@@ -1,3 +1,5 @@
-eval let x be 9 in
+main
+
+let x be 9 in
 	let x be 7
 		in x

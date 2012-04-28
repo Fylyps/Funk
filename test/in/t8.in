@@ -1,2 +1,4 @@
-id x y be x eval
-let x be 1 in id 3 2 
+id x y be x
+
+main
+let x be 1 in (id 3 2 )

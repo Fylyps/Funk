@@ -3,11 +3,12 @@
 comment "//" ;
 comment "/*" "*/" ;
 
-Program.	Prog ::= [Decl] "eval" Exp ;
+Program.	Prog ::= [Decl] "main" Exp ;
 
 Declaration.	Decl ::= Ident [Ident] "be" Exp ;
 
-EApplication.	Exp ::= Ident [Exp] ;
+EGet.		Exp ::= Ident ;
+EApplication.	Exp ::= "(" Ident [Exp] ")" ;
 ELet.		Exp ::= "let" Decl "in" Exp ;
 EInt.		Exp1 ::= Integer ;
 

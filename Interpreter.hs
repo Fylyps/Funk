@@ -32,6 +32,7 @@ apply env val args = case args of
 
 eval :: Env -> Exp -> Value
 eval env e = case e of
+	EGet id -> apply env (env!id) []
 	EApplication id args -> apply env (env!id) args
 	ELet d exp  -> 	eval (ienv env d) exp
 	EInt n -> Vint n
