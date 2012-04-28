@@ -1,8 +1,8 @@
 module Main where
 
-import Lexfunk
-import Parfunk
-import Absfunk
+import LexFunk
+import ParFunk
+import AbsFunk
 import Interpreter
 
 import ErrM

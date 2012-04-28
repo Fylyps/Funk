@@ -1,1 +1,1 @@
-bnfc -m funk.cf ; make
+bnfc -m Funk.cf ; make

@@ -1,6 +1,6 @@
 module Interpreter where
 
-import Absfunk
+import AbsFunk
 
 import Data.Map
 
