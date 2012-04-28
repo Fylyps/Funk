@@ -11,9 +11,6 @@ buildValue env args exp = case args of
 	[] -> eval env exp
 	h:t -> return $ VFun (\v -> buildValue (ienv env h v) t exp)
 
-ienv :: Env -> Ident -> Value -> Env
-ienv env id val = Map.insert id val env
-
 insertDec :: Env -> [Decl] -> Err Env
 insertDec env decs = case decs of
 	[] -> return env
@@ -24,9 +21,6 @@ insertDec env decs = case decs of
 	h:t -> do 
 		nenv <- insertDec env [h]
 		insertDec nenv t
-
-insertMatch :: Env -> [(Ident, Value)] -> Env
-insertMatch = foldl (\env (i,v) -> ienv env i v)
 
 run :: Prog -> Err Value
 run (Program decs exp) = let std = insertStd Map.empty in do
@@ -60,7 +54,7 @@ matchCase env v patts = case patts of
 	[] -> fail "match not found"
 	[(Pattern m e)] -> do
 		(good, matchs) <- match env v m
-		if good then let nenv = insertMatch env matchs in eval nenv e 
+		if good then let nenv = insertMany env matchs in eval nenv e 
 			else matchCase env v []
 	h:t -> let r = matchCase env v [h] in case r of
 			Ok v -> r
@@ -78,6 +72,11 @@ eval env e = case e of
 	ECase exp patts -> do
 		v <- eval env exp
 		matchCase env v patts
+	EIf cond e1 e2 -> do
+		v <- eval env cond
+		case v of
+			(VBool b) -> if b then eval env e1 else eval env e2
+			_ -> fail "Not boolean value in if"
 	EList exps -> case exps of
 			[] -> return $ VList []
 			h:t -> do
@@ -93,6 +92,8 @@ eval env e = case e of
 			rh <- eval env h
 			return $ VTuple (Just rh) (Just rt)
 	EInt n -> return $ VInt n
+	EFalse -> return $ VBool False
+	ETrue -> return $ VBool True
 	EPom e -> eval env e
 
 

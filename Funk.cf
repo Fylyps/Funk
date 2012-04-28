@@ -9,6 +9,7 @@ Declaration.	Decl ::= Ident [Ident] "be" Exp ;
 
 ELet.		Exp ::= "let" Decl "in" Exp ;
 ECase.		Exp ::= "case" Exp "of" [Patt] ;
+EIf.		Exp ::= "if" Exp "then" Exp "else" Exp "fi";
 EGet.		Exp1 ::= Ident ;
 EApplication.	Exp1 ::= "(" Ident [Exp1] ")" ;
 EList.		Exp1 ::= "[" [Exp2] "]" ;
@@ -16,6 +17,8 @@ EEmptyList.	Exp1 ::= "[]" ;
 EEmptyTuple.	Exp1 ::= "{}" ;
 ETuple.		Exp1 ::= "{" [Exp2] "}" ; 
 EInt.		Exp1 ::= Integer ;
+EFalse.		Exp1 ::= "False" ;
+ETrue.		Exp1 ::= "True" ;
 EPom.		Exp2 ::= Exp1 ;
 
 coercions Exp 1 ;
