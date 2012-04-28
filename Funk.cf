@@ -7,26 +7,33 @@ Program.	Prog ::= [Decl] "main" Exp ;
 
 Declaration.	Decl ::= Ident [Ident] "be" Exp ;
 
-EGet.		Exp ::= Ident ;
-EApplication.	Exp ::= "(" Ident [Exp] ")" ;
 ELet.		Exp ::= "let" Decl "in" Exp ;
-ECase.		Exp1 ::= "case" Exp "of" [Patt] ;
-EList.		Exp2 ::= "[" [Exp2] "]" ;
-EEmptyList.	Exp2 ::= "[]" ;
-EEmptyTuple.	Exp2 ::= "()" ;
-ETuple.		Exp2 ::= "(" [Exp2] ")" ; 
-EInt.		Exp3 ::= Integer ;
+ECase.		Exp ::= "case" Exp "of" [Patt] ;
+EGet.		Exp1 ::= Ident ;
+EApplication.	Exp1 ::= "(" Ident [Exp1] ")" ;
+EList.		Exp1 ::= "[" [Exp2] "]" ;
+EEmptyList.	Exp1 ::= "[]" ;
+EEmptyTuple.	Exp1 ::= "{}" ;
+ETuple.		Exp1 ::= "{" [Exp2] "}" ; 
+EInt.		Exp1 ::= Integer ;
+EPom.		Exp2 ::= Exp1 ;
+
+coercions Exp 1 ;
 
 Pattern.	Patt ::= Match "->" Exp;
 
-MatchEmpList.	Match ::= "[]" ;
-MatchHeadTail.	Match ::=  Ident "::" Ident ;
+Identifier.	TIdent ::= Ident; 
 
-coercions Exp 3 ;
+MatchExp.	Match ::= Exp ;
+MatchHeadTail.	Match ::= Ident "::" Ident ;
+MatchTuple.	Match ::= "{" [TIdent] "}" ;
+
 
 separator Ident "" ;
+separator TIdent "," ;
 separator Decl ";" ;
 separator Exp "" ;
+separator Exp1 "" ;
 separator Exp2 "," ;
 separator Patt "|" ;
 

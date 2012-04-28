@@ -10,6 +10,12 @@ data Value = VInt Integer
 	   | VTuple (Maybe Value) (Maybe Value) -- if left is nothing then its () 
 	   | VFun {f :: Value -> Err Value}
 
+instance Eq Value where
+	(VInt x)    == (VInt y)    = x == y
+	(VList x) == (VList y) = x == y
+	VTuple a b == VTuple c d = a == c && b == d
+	_ == _ = False
+
 tuple2List t = case t of
 	VTuple Nothing Nothing -> []
 	VTuple (Just x) Nothing -> [x]
@@ -19,7 +25,7 @@ instance Show Value where
 	show (VInt i) = show i
 	show (VFun _) = "<fun>"
 	show (VList t) = "[" ++ intercalate "," (Prelude.map show t) ++ "]"
-	show v@(VTuple a b) = "(" ++ intercalate "," list ++ ")"
+	show v@(VTuple a b) = "{" ++ intercalate "," list ++ "}"
 		where list = Prelude.map show $ tuple2List v
 
 type Env = Map Ident Value

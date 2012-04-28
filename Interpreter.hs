@@ -46,19 +46,20 @@ apply f args = case f of
 				apply nf t
 	_ -> fail "applied sth to not-function"
 
-match :: Value -> Match -> (Bool,[(Ident,Value)])
-match v m = case m of
-	MatchEmpList -> case v of 
-		VList [] -> (True, [])
-		_ -> (False,[])
+match :: Env -> Value -> Match -> Err (Bool,[(Ident,Value)])
+match env v m = case m of
 	MatchHeadTail idH idT -> case v of
-		VList (h:t) -> (True, [(idH,h), (idT,VList t)])
-		_ -> (False,[])
-
+		VList (h:t) -> return (True, [(idH,h), (idT,VList t)])
+		_ -> return (False,[])
+	MatchExp exp -> do
+		v2 <- eval env exp
+		if v == v2 then return (True, []) else return (False, [])
+	
 matchCase :: Env -> Value -> [Patt] -> Err Value
 matchCase env v patts = case patts of
 	[] -> fail "match not found"
-	[(Pattern m e)] -> let (good, matchs) = match v m in
+	[(Pattern m e)] -> do
+		(good, matchs) <- match env v m
 		if good then let nenv = insertMatch env matchs in eval nenv e 
 			else matchCase env v []
 	h:t -> let r = matchCase env v [h] in case r of
@@ -92,7 +93,7 @@ eval env e = case e of
 			rh <- eval env h
 			return $ VTuple (Just rh) (Just rt)
 	EInt n -> return $ VInt n
-
+	EPom e -> eval env e
 
 
 
