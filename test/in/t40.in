@@ -1,5 +1,5 @@
 
 {bool.int}:gimmeThat int=>{bool.int}:f be (f 1)
 
-main
+main:{bool.int}
 let {bool.int}:f int:n be {True, 7} in (gimmeThat f)

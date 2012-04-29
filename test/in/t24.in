@@ -1,5 +1,5 @@
 int:silnia int:n be 
 	if (eq n 0) then 1 else (times n (silnia (minus n 1))) fi
 
-main
+main:int
 (silnia 5)

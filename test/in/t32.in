@@ -4,5 +4,5 @@ int:sqr int:a be (times a a);
 
 int:conv int=>int:f int=>int:g int:x be (f (g x))
 
-main
+main:int
 (sqr (conv times2 plus10 1))

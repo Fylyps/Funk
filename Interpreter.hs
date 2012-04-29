@@ -14,7 +14,7 @@ buildType t signs = case signs of
 buildTValue :: (Env, Store) -> Type -> [Sign] -> Exp -> Err TValue
 buildTValue es@(env, st) t args exp = case args of						
 	[] -> case eval es exp of
-		Ok (evalt, v) -> if evalt /= t then fail ("evaluated to different type" ++ (show t) ++ (show evalt))else return (t,v)
+		Ok (evalt, v) -> if evalt /= t then fail "evaluated to different type" else return (t,v)
 		Bad e -> fail e
 	(Sign ht hid):tl -> return $ (buildType t args, VFun (\es2 arg@(targ,varg) -> if targ /= ht then (fail "runtime error: argument type mismach", es) else
 						let nes = ies es2 hid arg in 
@@ -35,10 +35,11 @@ insertDecs es decs = case decs of
 		nes <- insertDecs es [h]
 		insertDecs nes t
 
-run :: Prog -> Err TValue
-run (Program decs exp) = let std = insertStd (Map.empty, Map.empty) in do
+run :: Prog -> Err Value
+run (Program decs t exp) = let std = insertStd (Map.empty, Map.empty) in do
 	es <- insertDecs std decs
-	eval es exp 
+	(et, ev) <- eval es exp 
+	if et /= t then fail "program evaluated to different type" else return ev
 
 apply :: (Env, Store) -> TValue -> [Err TValue] -> (Err TValue, (Env, Store))
 apply es f args = case f of 

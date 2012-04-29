@@ -1,4 +1,4 @@
 int:apply int=>int=>int:f int:a int:b be (f a b)
 
-main
+main:int
 (apply (int:lambda int:x int:y -> (plus (inv x) x)) 5 7)

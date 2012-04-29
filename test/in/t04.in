@@ -1,5 +1,5 @@
 int:k be 1; 
 
-main
+main:int
 
 let int:x be 8 in k

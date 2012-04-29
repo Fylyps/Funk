@@ -1,4 +1,4 @@
-main
+main:int
 
 case [1, (plus 1 2), 2] of
 	[1,2,3] -> 0

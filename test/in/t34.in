@@ -6,6 +6,6 @@ int:fib int:n be
 		fi
 	fi
 
-main
+main:int
 (fib 8)
 

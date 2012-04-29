@@ -1,4 +1,4 @@
 int:test int:a int:b int:c int:d int:e be (plus a (plus b (plus c (plus d (plus e 0)))))
 
-main
+main:int
 (test 1 2 3 4 5)

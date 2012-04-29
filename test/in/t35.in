@@ -1,5 +1,5 @@
 int:app int=>int:f int:e be (f e)
 
-main
+main:int
 
 (app (plus 3) 4)

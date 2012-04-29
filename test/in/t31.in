@@ -1,5 +1,5 @@
 int:id int:x be (inv x);
 int:apply int=>int:f int:x be (f x)
 
-main
+main:int
 (apply id 5)

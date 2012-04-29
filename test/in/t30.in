@@ -5,5 +5,5 @@ int:sgn int:x be
 			 fi 
 	fi
 
-main
+main:int
 (sgn (inv 5))

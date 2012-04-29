@@ -3,7 +3,7 @@
 comment "//" ;
 comment "/*" "*/" ;
 
-Program.	Prog ::= [Decl] "main" Exp ;
+Program.	Prog ::= [Decl] "main:" Type Exp ;
 
 Declaration.	Decl ::= Sign [Sign] "be" Exp ;
 

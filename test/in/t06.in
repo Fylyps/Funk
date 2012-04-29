@@ -1,5 +1,5 @@
 int:id int:x be x
 
 
-main
+main:int
 let int:y be (id 8) in (id y)
