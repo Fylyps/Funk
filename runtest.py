@@ -6,13 +6,17 @@ outPath = "test/out/"
 def run_test(testName):
 	cmd = "cat "+inPath+testName+".in | runhaskell Interpret.hs"
 	result = os.popen(cmd, "r").read() 
-	out = open(os.path.join(outPath, testName + ".out")).read()
-	if result == out:
-		print "OK: " + testName
-	else:
-		print "ERROR: " + testName
+	try:
+		out = open(os.path.join(outPath, testName + ".out")).read()
+		if result == out:
+			print "OK: " + testName
+		else:
+			print "ERROR: " + testName
+			print result
+	except Exception as e:
+		print "PYTHON ERROR"
+		print str(e)
 		print result
-
 
 
 def run_tests():	

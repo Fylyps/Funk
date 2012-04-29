@@ -1,0 +1,5 @@
+silnia n be 
+	if (eq n 0) then 1 else (times n (plus n (minus n 1))) fi
+
+main
+(silnia 5)

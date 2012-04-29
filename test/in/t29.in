@@ -1,0 +1,4 @@
+test a b c d e be (plus a (plus b (plus c (plus d (plus e 0)))))
+
+main
+(test 1 2 3 4 5)

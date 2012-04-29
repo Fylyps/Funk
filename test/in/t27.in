@@ -1,0 +1,3 @@
+
+main
+(times (inv 10) 5)

@@ -1,0 +1,8 @@
+times2 a be (times 2 a);
+plus10 a be (plus 10 a);
+sqr a be (times a a);
+
+conv f g x be (f (g x))
+
+main
+(sqr (conv times2 plus10 1))

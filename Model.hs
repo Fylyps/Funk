@@ -36,7 +36,8 @@ type Env = Map Ident Value
 lookFor :: Env -> Ident -> Err Value
 lookFor env id = case Data.Map.lookup id env of
 	Just v -> return v
-	Nothing -> fail "not defined"
+	Nothing -> case id of
+		Ident name -> fail $ (show name) ++ " not defined -" ++ (showTree env)
 
  
 ienv :: Env -> Ident -> Value -> Env
