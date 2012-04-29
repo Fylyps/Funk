@@ -21,7 +21,7 @@ def run_test(testName):
 
 def run_tests():	
 	print "Runing all tests:"
-	for infile in sorted(os.listdir(inPath)):
+	for infile in reversed(sorted(os.listdir(inPath))):
 		testName = infile.split(".")[0]
 		run_test(testName)
 		

@@ -11,12 +11,6 @@ data Value = VInt Integer
 	   | VFun {f :: (Env, Store) -> Value -> (Err Value, (Env, Store))}
 	   | VBool Bool
 
-data Type = TInt 
-	  | TBool 
-          | TList Type -- lista pamieta typ elementow
-	  | TTuple [Type] -- tupla pamieta typy poszczegolnych elementow
-	  | TFun Type Type -- typ argumentu i typ wyniku
-
 instance Eq Value where
 	(VBool x) == (VBool y) = x == y
 	(VInt x)    == (VInt y)    = x == y

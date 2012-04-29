@@ -1,0 +1,4 @@
+int:tupTest {int.bool}:x be 7
+
+main
+(tupTest {1,True})

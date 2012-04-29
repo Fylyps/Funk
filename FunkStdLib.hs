@@ -10,7 +10,7 @@ insertStd :: (Env, Store) -> (Env, Store)
 insertStd es =
 	insertMany es [((Ident "plus"), (op2 plus)), ((Ident "minus"),(op2 minus)), ((Ident "times"),(op2 times)), ((Ident "divide"),(op2 divide)), 
 			((Ident "eq"),(op2 eq)), ((Ident "neq"),(op2 neq)), ((Ident "inv"),(op1 inv)), 
-			((Ident "gt"),(op2 gt)), ((Ident "lt"),(op2 lt))]
+			((Ident "gt"),(op2 gt)), ((Ident "lt"),(op2 lt)), ((Ident "join"),(op2 join))]
 
 op1 f = VFun (\s a-> (f a, s))
 op2 f = VFun (\s a -> (return $ VFun (\s b -> (f a b, s)),s)) 
@@ -44,3 +44,6 @@ inv a = case a of
 	(VBool b) -> return $ VBool (not b)
 	_ -> fail "unable to inverse"
 
+join a b = case b of
+	(VList t) -> return $ VList (a:t)
+	_ -> fail "second argument should be a list"

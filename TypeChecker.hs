@@ -12,6 +12,6 @@ import qualified Data.Map as Map
 
 
 checkTypes :: Prog -> Err Bool  
-checkTypes (Program decs exp) = return True --fail "type error" 
+checkTypes (Program decs exp) = return True 
 
 
