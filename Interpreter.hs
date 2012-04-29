@@ -78,6 +78,7 @@ eval es@(env, st) e = case e of
 	ECase exp patts -> do
 		v <- eval es exp
 		matchCase es v patts
+	ELambda ids exp -> buildValue es ids exp 
 	EIf cond e1 e2 -> do
 		v <- eval es cond
 		case v of

@@ -10,6 +10,7 @@ Declaration.	Decl ::= Ident [Ident] "be" Exp ;
 ELet.		Exp ::= "let" Decl "in" Exp ;
 ECase.		Exp ::= "case" Exp "of" [Patt] ;
 EIf.		Exp ::= "if" Exp "then" Exp "else" Exp "fi";
+ELambda.	Exp ::= "lambda" [Ident] "->" Exp ;
 EGet.		Exp1 ::= Ident ;
 EApplication.	Exp1 ::= "(" Ident [Exp1] ")" ;
 EList.		Exp1 ::= "[" [Exp2] "]" ;

@@ -1,0 +1,4 @@
+apply f x be (f x)
+
+main
+(apply (lambda x y -> (plus (inv x) x)) 5 7)
