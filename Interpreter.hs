@@ -6,11 +6,6 @@ import Model
 import FunkStdLib
 import qualified Data.Map as Map  
 
-buildType :: Type -> [Sign] -> Type
-buildType t signs = case signs of
-	[] -> t
-	(Sign h _):tl -> TFun h (buildType t tl)
-
 buildTValue :: (Env, Store) -> Type -> [Sign] -> Exp -> Err TValue
 buildTValue es@(env, st) t args exp = case args of						
 	[] -> case eval es exp of

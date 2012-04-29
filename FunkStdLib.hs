@@ -16,7 +16,8 @@ insertStd es =
 			((Ident "eq"),(op2 TBool (VBool) (==))),
 			((Ident "neq"),(op2 TBool (VBool) (/=))),
 			((Ident "gt"),(op2 TBool (VBool) (>))), 
-			((Ident "lt"),(op2 TBool (VBool) (<)))
+			((Ident "lt"),(op2 TBool (VBool) (<))),
+			((Ident "boolean"),(op1 TBool (VBool) (/=0)))
 			]
 
 

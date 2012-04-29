@@ -1,1 +1,1 @@
-"RUN ERROR: Not boolean value in if"
+"TYPE ERROR: type mismatch (got int)"

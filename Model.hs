@@ -10,6 +10,7 @@ data Value = VInt Integer
 	   | VTuple (Maybe Value) (Maybe Value) -- if left is nothing then its () 
 	   | VFun {f :: (Env, Store) -> TValue -> (Err TValue, (Env, Store))}
 	   | VBool Bool
+	   | VNone
 
 instance Eq Value where
 	(VBool x) == (VBool y) = x == y
@@ -63,5 +64,11 @@ ies (env, st) id val = let loc = nextLoc st in
 
 insertMany :: (Env, Store) -> [(Ident, TValue)] -> (Env, Store)
 insertMany = foldl (\es (i,v) -> ies es i v)
+
+
+buildType :: Type -> [Sign] -> Type
+buildType t signs = case signs of
+	[] -> t
+	(Sign h _):tl -> TFun h (buildType t tl)
 
 

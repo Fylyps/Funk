@@ -1,4 +1,4 @@
-bool:f int:a int:b be (plus a b)
+bool:f int:a int:b be (boolean (plus a b))
 
 main:bool
 (f 1 2)
