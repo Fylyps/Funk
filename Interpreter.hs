@@ -6,44 +6,48 @@ import Model
 import FunkStdLib
 import qualified Data.Map as Map  
 
-ids :: [Sign] -> [Ident]
-ids = map (\ (Signature t id) -> id) 
+buildType :: Type -> [Sign] -> Type
+buildType t signs = case signs of
+	[] -> t
+	(Sign h _):tl -> TFun h (buildType t tl)
 
+buildTValue :: (Env, Store) -> Type -> [Sign] -> Exp -> Err TValue
+buildTValue es@(env, st) t args exp = case args of						
+	[] -> case eval es exp of
+		Ok (evalt, v) -> if evalt /= t then fail ("evaluated to different type" ++ (show t) ++ (show evalt))else return (t,v)
+		Bad e -> fail e
+	(Sign ht hid):tl -> return $ (buildType t args, VFun (\es2 arg@(targ,varg) -> if targ /= ht then (fail "runtime error: argument type mismach", es) else
+						let nes = ies es2 hid arg in 
+							(buildTValue nes t tl exp, nes)))
 
-buildValue :: (Env, Store) -> [Ident] -> Exp -> Err Value
-buildValue es@(env, st) args exp = case args of						
-	[] -> eval es exp
-	h:t -> return $ VFun (\es2 v -> let nes = ies es2 h v in 
-						(buildValue nes t exp, nes)) 
-
-insertDec :: (Env, Store) -> Ident -> [Ident] -> Exp -> Err (Env, Store)
-insertDec (env, st) id args exp = let loc = nextLoc st in
+insertDec :: (Env, Store) -> Sign -> [Sign] -> Exp -> Err (Env, Store)
+insertDec (env, st) (Sign t id) args exp = let loc = nextLoc st in
 	let nenv = ienv env id loc in do 
-	val <- buildValue (nenv, st) args exp
-	return $ (nenv, ist st loc val)
+	tv <- buildTValue (nenv, st) t args exp
+	return $ (nenv, ist st loc tv)
 	
 
 insertDecs :: (Env, Store) -> [Decl] -> Err (Env, Store)
 insertDecs es decs = case decs of
 	[] -> return es
-	[(Declaration sign args exp)] -> case sign of
-		Signature t id -> insertDec es id (ids args) exp 
+	[(Declaration sign args exp)] -> insertDec es sign args exp 
 	h:t -> do 
 		nes <- insertDecs es [h]
 		insertDecs nes t
 
-run :: Prog -> Err Value
+run :: Prog -> Err TValue
 run (Program decs exp) = let std = insertStd (Map.empty, Map.empty) in do
 	es <- insertDecs std decs
 	eval es exp 
 
-apply :: (Env, Store) -> Value -> [Err Value] -> (Err Value, (Env, Store))
+apply :: (Env, Store) -> TValue -> [Err TValue] -> (Err TValue, (Env, Store))
 apply es f args = case f of 
-	VFun inFun -> 
+	(TFun argt outt, VFun inFun) -> 
 		case args of
 			[] -> (fail "too less arguments", es)
 			[h] -> case h of
-				Ok v -> inFun es v
+				Ok (t,v) -> if argt /= t then (fail "runtime error: argument type mismatch", es)
+						else inFun es (t,v)
 				Bad e -> (fail e, es)
 			h:t -> let (nf, ns) = apply es f [h] in
 				case nf of 
@@ -51,16 +55,17 @@ apply es f args = case f of
 					Bad e -> (fail e, es)
 	e -> (fail $ "applied sth to not-function" ++ (show e), es)
 
-match :: (Env, Store) -> Value -> Match -> Err (Bool,[(Ident,Value)])
-match es v m = case m of
+match :: (Env, Store) -> TValue -> Match -> Err (Bool,[(Ident,TValue)])
+match es (t,v) m = case m of
 	MatchHeadTail idH idT -> case v of
-		VList (h:t) -> return (True, [(idH,h), (idT,VList t)])
+		VList (h:tl) -> case t of
+			TList inner -> return (True, [(idH,(inner, h)), (idT,(t, VList tl))])
 		_ -> return (False,[])
 	MatchExp exp -> do
-		v2 <- eval es exp
-		if v == v2 then return (True, []) else return (False, [])
+		(t2,v2) <- eval es exp
+		if t == t2 && v == v2 then return (True, []) else return (False, [])
 	
-matchCase :: (Env, Store) -> Value -> [Patt] -> Err Value
+matchCase :: (Env, Store) -> TValue -> [Patt] -> Err TValue
 matchCase es v patts = case patts of
 	[] -> fail "match not found"
 	[(Pattern m e)] -> do
@@ -71,7 +76,16 @@ matchCase es v patts = case patts of
 			Ok v -> r
 			_ -> matchCase es v t
 
-eval :: (Env, Store) -> Exp -> Err Value
+generateRestOfList :: (Env, Store) -> Type -> [Exp] -> Err [Value]
+generateRestOfList es t exps = case exps of
+	[] -> return []
+	h:tl -> do
+		(et, ev) <- eval es h
+		rest <- generateRestOfList es t tl
+		if et /= t then fail "elements of list have different types" else return $ ev:rest
+			
+
+eval :: (Env, Store) -> Exp -> Err TValue
 eval es@(env, st) e = case e of
 	EGet id -> lookFor es id 
 	EApplication id params -> do
@@ -81,31 +95,37 @@ eval es@(env, st) e = case e of
 		nes <- insertDecs es [d]
 		eval nes exp
 	ECase exp patts -> do
-		v <- eval es exp
-		matchCase es v patts
-	ELambda _ signs exp -> buildValue es (ids signs) exp 
+		tv <- eval es exp
+		matchCase es tv patts
+	ELambda t signs exp -> buildTValue es t signs exp 
 	EIf cond e1 e2 -> do
-		v <- eval es cond
-		case v of
-			(VBool b) -> if b then eval es e1 else eval es e2
+		tv <- eval es cond
+		case tv of
+			(TBool, VBool b) -> if b then eval es e1 else eval es e2
 			_ -> fail "Not boolean value in if"
 	EList exps -> case exps of
-			[] -> return $ VList []
 			h:t -> do
-				VList nt <- eval es (EList t)
-				nh <- eval es h
-				return $ VList (nh:nt)
-	EEmptyList -> return $ VList []			
-	EEmptyTuple -> return $ VTuple Nothing Nothing
+				(th,nh) <- eval es h
+				nt <- generateRestOfList es th t
+				return $ (TList th, VList (nh:nt))
+	EHeadTail exph expt -> do
+			(th, vh) <- eval es exph
+			(tt, vt) <- eval es expt
+			case (tt, vt) of
+				(TList t, VList tl) -> if th /= t then fail "cannot join to list of different type"
+							else return (TList t, VList (vh:tl))
+				_ -> fail "cannot join to non list element"
+	EEmptyList t -> return $ (TList t, VList [])
+	EEmptyTuple -> return $ (TTuple [], VTuple Nothing Nothing)
 	ETuple exps -> case exps of
-		[] -> return $ VTuple Nothing Nothing
+		[] -> eval es EEmptyTuple 
 		h:t -> do
-			rt <- eval es (ETuple t)
-			rh <- eval es h
-			return $ VTuple (Just rh) (Just rt)
-	EInt n -> return $ VInt n
-	EFalse -> return $ VBool False
-	ETrue -> return $ VBool True
+			(TTuple tt, vt) <- eval es (ETuple t)
+			(th, vh) <- eval es h
+			return $ (TTuple (th:tt), VTuple (Just vh) (Just vt))
+	EInt n -> return $ (TInt, VInt n)
+	EFalse -> return $ (TBool, VBool False)
+	ETrue -> return $ (TBool, VBool True)
 	EPom e -> eval es e
 
 

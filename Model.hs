@@ -8,7 +8,7 @@ import ErrM
 data Value = VInt Integer 
 	   | VList [Value] 
 	   | VTuple (Maybe Value) (Maybe Value) -- if left is nothing then its () 
-	   | VFun {f :: (Env, Store) -> Value -> (Err Value, (Env, Store))}
+	   | VFun {f :: (Env, Store) -> TValue -> (Err TValue, (Env, Store))}
 	   | VBool Bool
 
 instance Eq Value where
@@ -33,12 +33,13 @@ instance Show Value where
 
 type Loc = Int
 type Env = Map Ident Loc
-type Store = Map Loc Value
+type TValue = (Type, Value)
+type Store = Map Loc TValue
 
 nextLoc :: Store -> Loc
 nextLoc st = (size st) + 1
 
-lookFor :: (Env, Store) -> Ident -> Err Value
+lookFor :: (Env, Store) -> Ident -> Err TValue
 lookFor (env, st) id = case Data.Map.lookup id env of
 	Just loc -> case Data.Map.lookup loc st of
 		Just v -> return $ v
@@ -51,16 +52,16 @@ lookFor (env, st) id = case Data.Map.lookup id env of
 ienv :: Env -> Ident -> Loc -> Env
 ienv env id loc = Data.Map.insert id loc env
 
-ist :: Store -> Loc -> Value -> Store
+ist :: Store -> Loc -> TValue -> Store
 ist st loc val = Data.Map.insert loc val st
  
-ies :: (Env, Store) -> Ident -> Value -> (Env, Store)
+ies :: (Env, Store) -> Ident -> TValue -> (Env, Store)
 ies (env, st) id val = let loc = nextLoc st in	
 			 let nst = ist st loc val in
 			  let nenv = ienv env id loc in
 			   (nenv, nst)
 
-insertMany :: (Env, Store) -> [(Ident, Value)] -> (Env, Store)
+insertMany :: (Env, Store) -> [(Ident, TValue)] -> (Env, Store)
 insertMany = foldl (\es (i,v) -> ies es i v)
 
 

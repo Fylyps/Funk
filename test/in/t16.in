@@ -1,5 +1,5 @@
 main
 
 case [1,2,3] of 
-	  [] -> []
+	  int:[] -> int:[]
 	| h::t -> t 

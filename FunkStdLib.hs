@@ -8,42 +8,27 @@ import ErrM
 
 insertStd :: (Env, Store) -> (Env, Store)
 insertStd es =
-	insertMany es [((Ident "plus"), (op2 plus)), ((Ident "minus"),(op2 minus)), ((Ident "times"),(op2 times)), ((Ident "divide"),(op2 divide)), 
-			((Ident "eq"),(op2 eq)), ((Ident "neq"),(op2 neq)), ((Ident "inv"),(op1 inv)), 
-			((Ident "gt"),(op2 gt)), ((Ident "lt"),(op2 lt)), ((Ident "join"),(op2 join))]
+	insertMany es [ ((Ident "plus"),(op2 TInt (VInt) (+))),
+			((Ident "minus"),(op2 TInt (VInt) (-))), 
+			((Ident "times"),(op2 TInt (VInt) (*))), 
+			((Ident "divide"),(op2 TInt (VInt) (div))),
+			((Ident "inv"),(op1 TInt (VInt) (0-))),
+			((Ident "eq"),(op2 TBool (VBool) (==))),
+			((Ident "neq"),(op2 TBool (VBool) (/=))),
+			((Ident "gt"),(op2 TBool (VBool) (>))), 
+			((Ident "lt"),(op2 TBool (VBool) (<)))
+			]
 
-op1 f = VFun (\s a-> (f a, s))
-op2 f = VFun (\s a -> (return $ VFun (\s b -> (f a b, s)),s)) 
--- two arguments operator should be of type :: Value -> Value -> Err Value
 
-plus a b = case (a,b) of
-	(VInt x, VInt y) -> return $ VInt (x + y)
-	_ -> fail "unable to add"
+op1 outType constr op = (TFun TInt outType, VFun (\s a-> ((createOp1 outType constr op) a, s)))
+op2 outType constr op = (TFun TInt (TFun TInt outType), VFun (\s a -> 
+		(return $ ((TFun TInt outType),VFun (\s b -> ((createOp2 outType constr op) a b, s))),s)))
 
-minus a b = case (a,b) of
-	(VInt x, VInt y) -> return $ VInt (x - y)
-	_ -> fail "unable to subtract"
+createOp1 t constr op a = case a of
+	(TInt, VInt x) -> return $ (t, constr (op x))
+	_ -> fail "unable to use operator"
 
-times a b = case (a,b) of
-	(VInt x, VInt y) -> return $ VInt (x*y)
-	_ -> fail "unable to multiply"
+createOp2 t constr op a b = case (a,b) of
+	((TInt, VInt x), (TInt,VInt y)) -> return $ (t, constr (op x y))
+	_ -> fail "unable to use operator"
 
-divide a b = case (a,b) of
-	(VInt x, VInt y) -> return $ VInt (div x y)
-	_ -> fail "unable to divide"
-
-eq a b = return $ VBool (a == b)
-neq a b = return $ VBool (a /= b)
-gt a b = case (a,b) of
-	(VInt x, VInt y) -> return $ VBool (x > y)
-	_ -> fail "unable to compare"
-lt a b = gt b a
-
-inv a = case a of
-	(VInt x) -> return $ VInt (-x)
-	(VBool b) -> return $ VBool (not b)
-	_ -> fail "unable to inverse"
-
-join a b = case b of
-	(VList t) -> return $ VList (a:t)
-	_ -> fail "second argument should be a list"

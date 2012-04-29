@@ -1,5 +1,5 @@
 
-[int]:f int:n be if (eq n 0) then [] else (join n (f (minus n 1))) fi
+[int]:f int:n be if (eq n 0) then int:[] else n :: (f (minus n 1)) fi
 
 main
 (f 5)
