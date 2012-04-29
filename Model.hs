@@ -8,7 +8,7 @@ import ErrM
 data Value = VInt Integer 
 	   | VList [Value] 
 	   | VTuple (Maybe Value) (Maybe Value) -- if left is nothing then its () 
-	   | VFun {f :: Value -> Err Value}
+	   | VFun {f :: (Env, Store) -> Value -> (Err Value, (Env, Store))}
 	   | VBool Bool
 
 instance Eq Value where
@@ -45,16 +45,22 @@ lookFor (env, st) id = case Data.Map.lookup id env of
 		Nothing -> case id of
 			Ident name -> fail $ "wrong location: " ++ (show loc) ++ " while performing search of " ++ name
 	Nothing -> case id of
-		Ident name -> fail $ (show name) ++ " not defined"
+		Ident name -> fail $ (show name) ++ " not defined " ++ (showTree env)
 
+
+ienv :: Env -> Ident -> Loc -> Env
+ienv env id loc = Data.Map.insert id loc env
+
+ist :: Store -> Loc -> Value -> Store
+ist st loc val = Data.Map.insert loc val st
  
-ienv :: (Env, Store) -> Ident -> Value -> (Env, Store)
-ienv (env, st) id val = let loc = nextLoc st in	
-			 let nst = Data.Map.insert loc val st in
-			  let nenv = Data.Map.insert id loc env in
+ies :: (Env, Store) -> Ident -> Value -> (Env, Store)
+ies (env, st) id val = let loc = nextLoc st in	
+			 let nst = ist st loc val in
+			  let nenv = ienv env id loc in
 			   (nenv, nst)
 
 insertMany :: (Env, Store) -> [(Ident, Value)] -> (Env, Store)
-insertMany = foldl (\es (i,v) -> ienv es i v)
+insertMany = foldl (\es (i,v) -> ies es i v)
 
 

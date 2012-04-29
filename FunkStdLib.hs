@@ -12,8 +12,8 @@ insertStd es =
 			((Ident "eq"),(op2 eq)), ((Ident "neq"),(op2 neq)), ((Ident "inv"),(op1 inv)), 
 			((Ident "gt"),(op2 gt)), ((Ident "lt"),(op2 lt))]
 
-op1 f = VFun (\a -> f a)
-op2 f = VFun (\a -> return $ VFun (\b -> f a b)) 
+op1 f = VFun (\s a-> (f a, s))
+op2 f = VFun (\s a -> (return $ VFun (\s b -> (f a b, s)),s)) 
 -- two arguments operator should be of type :: Value -> Value -> Err Value
 
 plus a b = case (a,b) of

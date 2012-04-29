@@ -7,38 +7,44 @@ import FunkStdLib
 import qualified Data.Map as Map  
 
 buildValue :: (Env, Store) -> [Ident] -> Exp -> Err Value
-buildValue es args exp = case args of						
+buildValue es@(env, st) args exp = case args of						
 	[] -> eval es exp
-	h:t -> return $ VFun (\v -> buildValue (ienv es h v) t exp)
+	h:t -> return $ VFun (\es2 v -> let nes = ies es2 h v in 
+						(buildValue nes t exp, nes)) 
 
-insertDec :: (Env, Store) -> [Decl] -> Err (Env, Store)
-insertDec es decs = case decs of
+insertDec :: (Env, Store) -> Ident -> [Ident] -> Exp -> Err (Env, Store)
+insertDec (env, st) id args exp = let loc = nextLoc st in
+	let nenv = ienv env id loc in do 
+	val <- buildValue (nenv, st) args exp
+	return $ (nenv, ist st loc val)
+	
+
+insertDecs :: (Env, Store) -> [Decl] -> Err (Env, Store)
+insertDecs es decs = case decs of
 	[] -> return es
-	[(Declaration id args exp)] -> let val = buildValue es args exp in
-		case val of
-			Ok v -> return $ ienv es id v
-			Bad e -> fail e
+	[(Declaration id args exp)] -> insertDec es id args exp
 	h:t -> do 
-		nes <- insertDec es [h]
-		insertDec nes t
+		nes <- insertDecs es [h]
+		insertDecs nes t
 
 run :: Prog -> Err Value
 run (Program decs exp) = let std = insertStd (Map.empty, Map.empty) in do
-	es <- insertDec std decs
+	es <- insertDecs std decs
 	eval es exp 
 
-apply :: Value -> [Err Value] -> Err Value
-apply f args = case f of 
+apply :: (Env, Store) -> Value -> [Err Value] -> (Err Value, (Env, Store))
+apply es f args = case f of 
 	VFun inFun -> 
 		case args of
-			[] -> fail "too less arguments"
+			[] -> (fail "too less arguments", es)
 			[h] -> case h of
-				Ok v -> inFun v 
-				Bad e -> fail e
-			h:t -> do
-				nf <- apply f [h]
-				apply nf t
-	_ -> fail "applied sth to not-function"
+				Ok v -> inFun es v
+				Bad e -> (fail e, es)
+			h:t -> let (nf, ns) = apply es f [h] in
+				case nf of 
+					Ok fun -> apply ns fun t
+					Bad e -> (fail e, es)
+	e -> (fail $ "applied sth to not-function" ++ (show e), es)
 
 match :: (Env, Store) -> Value -> Match -> Err (Bool,[(Ident,Value)])
 match es v m = case m of
@@ -61,13 +67,13 @@ matchCase es v patts = case patts of
 			_ -> matchCase es v t
 
 eval :: (Env, Store) -> Exp -> Err Value
-eval es e = case e of
+eval es@(env, st) e = case e of
 	EGet id -> lookFor es id 
 	EApplication id params -> do
 		f <- lookFor es id
-		apply f $ map (eval es) params
+		fst $ apply es f $ map (eval es) params
 	ELet d exp -> do
-		nes <- insertDec es [d]
+		nes <- insertDecs es [d]
 		eval nes exp
 	ECase exp patts -> do
 		v <- eval es exp
