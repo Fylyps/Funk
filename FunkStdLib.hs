@@ -6,9 +6,9 @@ import Model
 import Data.Map
 import ErrM
 
-insertStd :: Env -> Env
-insertStd env =
-	insertMany env [((Ident "plus"), (op2 plus)), ((Ident "minus"),(op2 minus)), ((Ident "times"),(op2 times)), ((Ident "divide"),(op2 divide)), 
+insertStd :: (Env, Store) -> (Env, Store)
+insertStd es =
+	insertMany es [((Ident "plus"), (op2 plus)), ((Ident "minus"),(op2 minus)), ((Ident "times"),(op2 times)), ((Ident "divide"),(op2 divide)), 
 			((Ident "eq"),(op2 eq)), ((Ident "neq"),(op2 neq)), ((Ident "inv"),(op1 inv)), 
 			((Ident "gt"),(op2 gt)), ((Ident "lt"),(op2 lt))]
 

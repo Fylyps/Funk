@@ -31,19 +31,30 @@ instance Show Value where
 	show v@(VTuple a b) = "{" ++ intercalate "," list ++ "}"
 		where list = Prelude.map show $ tuple2List v
 
-type Env = Map Ident Value
+type Loc = Int
+type Env = Map Ident Loc
+type Store = Map Loc Value
 
-lookFor :: Env -> Ident -> Err Value
-lookFor env id = case Data.Map.lookup id env of
-	Just v -> return v
+nextLoc :: Store -> Loc
+nextLoc st = (size st) + 1
+
+lookFor :: (Env, Store) -> Ident -> Err Value
+lookFor (env, st) id = case Data.Map.lookup id env of
+	Just loc -> case Data.Map.lookup loc st of
+		Just v -> return $ v
+		Nothing -> case id of
+			Ident name -> fail $ "wrong location: " ++ (show loc) ++ " while performing search of " ++ name
 	Nothing -> case id of
-		Ident name -> fail $ (show name) ++ " not defined -" ++ (showTree env)
+		Ident name -> fail $ (show name) ++ " not defined"
 
  
-ienv :: Env -> Ident -> Value -> Env
-ienv env id val = Data.Map.insert id val env
+ienv :: (Env, Store) -> Ident -> Value -> (Env, Store)
+ienv (env, st) id val = let loc = nextLoc st in	
+			 let nst = Data.Map.insert loc val st in
+			  let nenv = Data.Map.insert id loc env in
+			   (nenv, nst)
 
-insertMany :: Env -> [(Ident, Value)] -> Env
-insertMany = foldl (\env (i,v) -> ienv env i v)
+insertMany :: (Env, Store) -> [(Ident, Value)] -> (Env, Store)
+insertMany = foldl (\es (i,v) -> ienv es i v)
 
 
