@@ -1,6 +1,6 @@
 main:int
 
-case (plus 1 2) of
+let int:v be (plus 1 2) in case v of
 	2 -> 0
 	| 3 -> 1
 	| 4 -> 2

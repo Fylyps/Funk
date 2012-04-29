@@ -1,5 +1,6 @@
+[int]:e be [1,2,3]
 main:int
 
-case [1,2,3] of 
+case e of 
 	  int:[] -> 0 
 	| h::t -> h 

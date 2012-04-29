@@ -90,8 +90,8 @@ eval es@(env, st) e = case e of
 	ELet d exp -> do
 		nes <- insertDecs es [d]
 		eval nes exp
-	ECase exp patts -> do
-		tv <- eval es exp
+	ECase id patts -> do
+		tv <- lookFor es id
 		matchCase es tv patts
 	ELambda t signs exp -> buildTValue es t signs exp 
 	EIf cond e1 e2 -> do

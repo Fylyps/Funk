@@ -55,6 +55,24 @@ checkAllSim es (h:t) (e:exps) = do
 	check es h e
 	checkAllSim es t exps
 
+checkMatchElem :: (Env, Store) -> Match -> Type -> Err (Env, Store)
+checkMatchElem es m t = case m of
+	MatchExp exp -> case check es t exp of
+		Ok _ -> return es
+		Bad e -> fail e
+	MatchHeadTail idH idT -> case t of
+		TList tl -> let nes = ies es idH (tl, VNone) in
+				return $ ies nes idT (TList tl, VNone)
+		_ -> fail "cannot match this type to list pattern"
+
+checkMatch :: (Env, Store) -> Type -> Type -> [Patt] -> Err Bool
+checkMatch es elemt target patts = case patts of
+	[] -> return True
+	(Pattern m e):t -> do
+		nes <- checkMatchElem es m elemt 
+		b <- check nes target e 
+		checkMatch es elemt target t
+
 check :: (Env, Store) -> Type -> Exp -> Err Bool
 check es@(env, st) t e = case e of
 	EGet id -> do
@@ -66,8 +84,9 @@ check es@(env, st) t e = case e of
 	ELet d exp -> do
 		nes <- checkDecs es [d]
 		check nes t exp
-	ECase exp patts -> let exps = map (\(Pattern _ e) -> e) patts in do
-		checkAll es t exps
+	ECase id patts -> do
+		(tv, _) <- lookFor es id
+		checkMatch es tv t patts  
 	ELambda tlam signs exp -> let nes = insertSigns es signs in do
 		check nes tlam exp
 		let tl = buildType tlam signs in
