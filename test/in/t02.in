@@ -1,5 +1,5 @@
 main
 
-let x be 9 in
-	let x be 7
+let int:x be 9 in
+	let int:x be 7
 		in x

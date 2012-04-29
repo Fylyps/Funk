@@ -1,5 +1,5 @@
-id x be x
+int:id int:x be x
 
 
 main
-let y be (id 8) in (id y)
+let int:y be (id 8) in (id y)

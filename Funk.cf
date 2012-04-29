@@ -5,12 +5,14 @@ comment "/*" "*/" ;
 
 Program.	Prog ::= [Decl] "main" Exp ;
 
-Declaration.	Decl ::= Ident [Ident] "be" Exp ;
+Declaration.	Decl ::= Sign [Sign] "be" Exp ;
+
+Signature.	Sign ::= DefType ":" Ident;
 
 ELet.		Exp ::= "let" Decl "in" Exp ;
 ECase.		Exp ::= "case" Exp "of" [Patt] ;
 EIf.		Exp ::= "if" Exp "then" Exp "else" Exp "fi";
-ELambda.	Exp ::= "lambda" [Ident] "->" Exp ;
+ELambda.	Exp ::= DefType ":lambda" [Sign] "->" Exp ;
 EGet.		Exp1 ::= Ident ;
 EApplication.	Exp1 ::= "(" Ident [Exp1] ")" ;
 EList.		Exp1 ::= "[" [Exp2] "]" ;
@@ -26,18 +28,20 @@ coercions Exp 1 ;
 
 Pattern.	Patt ::= Match "->" Exp;
 
-Identifier.	TIdent ::= Ident; 
-
 MatchExp.	Match ::= Exp ;
 MatchHeadTail.	Match ::= Ident "::" Ident ;
-MatchTuple.	Match ::= "{" [TIdent] "}" ;
+MatchTuple.	Match ::= "{" [Ident] "}" ;
 
+TypeFun.	DefType ::= [DefType];
+TypeInt. 	DefType1 ::= "int";
+TypeBool.	DefType1 ::= "bool";
+coercions DefType 1 ;
 
-separator Ident "" ;
-separator TIdent "," ;
+separator Ident "," ;
 separator Decl ";" ;
 separator Exp "" ;
 separator Exp1 "" ;
 separator Exp2 "," ;
 separator Patt "|" ;
-
+separator Sign "";
+separator DefType "=>";

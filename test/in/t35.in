@@ -1,4 +1,4 @@
-app f e be (f e)
+int:app int=>int:f int:e be (f e)
 
 main
 

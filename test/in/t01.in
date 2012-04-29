@@ -1,2 +1,2 @@
 main 
-let x be 8 in x 
+let int:x be 8 in x 

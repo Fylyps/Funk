@@ -1,5 +1,5 @@
-id x be (inv x);
-apply f x be (f x)
+int:id int:x be (inv x);
+int:apply int=>int:f int:x be (f x)
 
 main
 (apply id 5)

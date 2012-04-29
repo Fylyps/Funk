@@ -6,6 +6,10 @@ import Model
 import FunkStdLib
 import qualified Data.Map as Map  
 
+ids :: [Sign] -> [Ident]
+ids = map (\ (Signature t id) -> id) 
+
+
 buildValue :: (Env, Store) -> [Ident] -> Exp -> Err Value
 buildValue es@(env, st) args exp = case args of						
 	[] -> eval es exp
@@ -22,7 +26,8 @@ insertDec (env, st) id args exp = let loc = nextLoc st in
 insertDecs :: (Env, Store) -> [Decl] -> Err (Env, Store)
 insertDecs es decs = case decs of
 	[] -> return es
-	[(Declaration id args exp)] -> insertDec es id args exp
+	[(Declaration sign args exp)] -> case sign of
+		Signature t id -> insertDec es id (ids args) exp 
 	h:t -> do 
 		nes <- insertDecs es [h]
 		insertDecs nes t
@@ -78,7 +83,7 @@ eval es@(env, st) e = case e of
 	ECase exp patts -> do
 		v <- eval es exp
 		matchCase es v patts
-	ELambda ids exp -> buildValue es ids exp 
+	ELambda _ signs exp -> buildValue es (ids signs) exp 
 	EIf cond e1 e2 -> do
 		v <- eval es cond
 		case v of

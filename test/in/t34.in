@@ -1,5 +1,5 @@
 
-fib n be 
+int:fib int:n be 
 	if (eq n 0) then 1 else
 		if (eq n 1) then 1 else
 			(plus (fib (minus n 1)) (fib (minus n 2)))

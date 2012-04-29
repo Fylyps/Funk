@@ -1,5 +1,5 @@
-k x be 7; 
+int:k int:x be 7; 
 
 main
 
-let x be 8 in x
+let int:x be 8 in x

@@ -1,4 +1,4 @@
-apply f x be (f x)
+int:apply int=>int:f int:x be (f x)
 
 main
-(apply (lambda x -> (inv x)) 5)
+(apply (int:lambda int:x -> (inv x)) 5)

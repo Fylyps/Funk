@@ -1,4 +1,4 @@
-id x y be x
+int:id int:x int:y be x
 
 main
-let x be 1 in (id 3 2 )
+let int:x be 1 in (id 3 2 )

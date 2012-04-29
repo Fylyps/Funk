@@ -1,5 +1,5 @@
-k be 1; 
+int:k be 1; 
 
 main
 
-let x be 8 in k
+let int:x be 8 in k
