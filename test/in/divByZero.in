@@ -1,0 +1,2 @@
+main:int
+(divide 10 0)
