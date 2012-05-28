@@ -1,0 +1,4 @@
+bool:f int:a int:b be ((plus a b))
+
+main:bool
+(f 1 True)

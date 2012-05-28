@@ -1,0 +1,6 @@
+int:x be 8;
+int:getGlob int:y be x;
+int:getLocal int:x be (getGlob x)
+
+main:int
+(getLocal 7)

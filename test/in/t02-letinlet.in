@@ -1,0 +1,4 @@
+main:int
+
+let int:x be 9 in
+	(plus (let int:x be 7 in x) x)

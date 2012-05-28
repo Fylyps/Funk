@@ -1,5 +1,0 @@
-main:int
-
-let int:x be 9 in
-	let int:x be 7
-		in x

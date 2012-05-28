@@ -28,7 +28,7 @@ checkTypes (Program decs t exp) = let std = insertStd (Map.empty, Map.empty) in 
 
 checkApplication :: (Env, Store) -> Type -> Type -> [Exp] -> Err Bool
 checkApplication es target tfun args = case args of
-	[] -> if target /= tfun then fail $ "function result different" else return True
+	[] -> if target /= tfun then fail $ "function application type error" else return True
 	h:t -> case tfun of
 		TFun argT resT -> do
 			checkApplication es target resT t

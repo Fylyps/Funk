@@ -1,0 +1,9 @@
+int:times2 int:a be (times 2 a);
+int:plus10 int:a be (plus 10 a);
+int:sqr int:a be (times a a);
+
+int:conv int=>int:f int=>int:g int:x be (f (g x));
+
+main:int
+
+let int=>int:z be (conv times2 plus10) in (sqr (z 1))
