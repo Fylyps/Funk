@@ -1,0 +1,4 @@
+int:conv int:x int:y be (y);
+
+main:int=>int
+(conv 10)

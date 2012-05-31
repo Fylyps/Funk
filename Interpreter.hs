@@ -11,15 +11,18 @@ buildTValue es@(env, st) t args exp = case args of
 	[] -> case eval es exp of
 		Ok (evalt, v) -> if evalt /= t then fail "evaluated to different type" else return (t,v)
 		Bad e -> fail e
-	(Sign ht hid):tl -> return $ (buildType t args, VFun (\es2 arg@(targ,varg) -> if targ /= ht then (fail "runtime error: argument type mismach", es) else
-						let nes = ies es2 hid arg in 
-							(buildTValue nes t tl exp, nes)))
+	(Sign ht hid):tl -> return $ (buildType t args, 
+		(VFun (\nes arg@(targ,varg) -> 
+			if targ /= ht then (fail "runtime error: argument type mismach in application", nes)
+						  else let nnes = ies nes hid arg in (buildTValue nnes t tl exp, nnes)) es))
 
 insertDec :: (Env, Store) -> Sign -> [Sign] -> Exp -> Err (Env, Store)
 insertDec (env, st) (Sign t id) args exp = let loc = nextLoc st in
-	let nenv = ienv env id loc in do 
-	tv <- buildTValue (nenv, st) t args exp
-	return $ (nenv, ist st loc tv)
+	let nenv = ienv env id loc in 
+	let mtv = buildTValue (nenv, st) t args exp in
+	case mtv of 
+		Ok tv -> let nst = ist st loc tv in	return $ (nenv, nst)
+		Bad e -> fail e
 	
 
 insertDecs :: (Env, Store) -> [Decl] -> Err (Env, Store)
@@ -31,25 +34,24 @@ insertDecs es decs = case decs of
 		insertDecs nes t
 
 run :: Prog -> Err Value
-run (Program decs t exp) = let std = insertStd (Map.empty, Map.empty) in do
+run (Program decs t exp) = let std = insertStd emptyES in do
 	es <- insertDecs std decs
 	(et, ev) <- eval es exp 
 	if et /= t then fail "program evaluated to different type" else return ev
 
 apply :: (Env, Store) -> TValue -> [Err TValue] -> (Err TValue, (Env, Store))
 apply es f args = case f of 
-	(TFun argt outt, VFun inFun) -> 
+	(TFun argt outt, VFun inFun iEs) ->
 		case args of
-			[] -> (fail "too less arguments", es)
+			[] -> (return f, es)
 			[h] -> case h of
-				Ok (t,v) -> if argt /= t then (fail "runtime error: argument type mismatch", es)
+				Ok (t,v) -> if argt /= t then (fail $ "runtime error: argument type mismatch (" ++ show(argt) ++ "<>" ++ show (t) ++ ")", es)
 						else inFun es (t,v)
 				Bad e -> (fail e, es)
-			h:t -> let (nf, ns) = apply es f [h] in
-				case nf of 
-					Ok fun -> apply ns fun t
-					Bad e -> (fail e, es)
-	e -> (fail $ "applied sth to not-function" ++ (show e), es)
+			h:t -> case apply es f [h] of -- byc moze trzeba brac pod uwage rowniez env
+					(Ok inf, nes) -> apply nes inf t
+					(Bad e,_) -> (fail e, es)
+	_ -> (fail $ "applied sth to not-function: " ++ (show f) ++ " with " ++ (show args), es)
 
 match :: (Env, Store) -> TValue -> Match -> Err (Bool,[(Ident,TValue)])
 match es (t,v) m = case m of
@@ -82,11 +84,14 @@ generateRestOfList es t exps = case exps of
 			
 
 eval :: (Env, Store) -> Exp -> Err TValue
-eval es@(env, st) e = case e of
+eval  es@(env, st) e = case e of
 	EGet id -> lookFor es id 
 	EApplication id params -> do
 		f <- lookFor es id
-		fst $ apply es f $ map (eval es) params
+		let args = map (eval es) params in
+			case f of
+				(TFun argt outt, VFun inFun iEs) -> let nes = ies iEs id f in fst $ apply nes f args
+				_ -> fst $ apply es f args
 	ELet d exp -> do
 		nes <- insertDecs es [d]
 		eval nes exp

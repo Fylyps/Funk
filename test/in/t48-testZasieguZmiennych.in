@@ -1,0 +1,5 @@
+int:x be 8;
+int:getGlob int:y be let int:x be 7 in 1;
+
+main:int
+let int:y be (getGlob 7) in x

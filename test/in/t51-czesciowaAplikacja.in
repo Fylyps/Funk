@@ -1,0 +1,5 @@
+int:conv int:x int:y be (inv y);
+
+main:int
+
+let int=>int:a be (conv 10) in (a 5)

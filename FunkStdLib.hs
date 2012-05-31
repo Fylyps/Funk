@@ -20,10 +20,12 @@ insertStd es =
 			((Ident "boolean"),(op1 TBool (VBool) (/=0)))
 			]
 
+op1 outType constr op = (TFun TInt outType, 
+						VFun (\es a-> ((createOp1 outType constr op) a, es) ) emptyES)
 
-op1 outType constr op = (TFun TInt outType, VFun (\s a-> ((createOp1 outType constr op) a, s)))
-op2 outType constr op = (TFun TInt (TFun TInt outType), VFun (\s a -> 
-		(return $ ((TFun TInt outType),VFun (\s b -> ((createOp2 outType constr op) a b, s))),s)))
+op2 outType constr op = (TFun TInt (TFun TInt outType), VFun (\es1 a ->	(
+	(return $ (TFun TInt outType, VFun (\es2 b -> (((createOp2 outType constr op) a b), es2)) emptyES))
+	, es1)) emptyES)
 
 createOp1 t constr op a = case a of
 	(TInt, VInt x) -> return $ (t, constr (op x))

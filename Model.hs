@@ -8,7 +8,7 @@ import ErrM
 data Value = VInt Integer 
 	   | VList [Value] 
 	   | VTuple (Maybe Value) (Maybe Value) -- if left is nothing then its () 
-	   | VFun {f :: (Env, Store) -> TValue -> (Err TValue, (Env, Store))}
+	   | VFun ((Env, Store) -> TValue -> (Err TValue, (Env, Store))) (Env, Store) -- store from definition, need to add itself
 	   | VBool Bool
 	   | VNone
 
@@ -27,7 +27,7 @@ tuple2List t = case t of
 instance Show Value where
 	show (VBool b) = show b
 	show (VInt i) = show i
-	show (VFun _) = "<fun>"
+	show (VFun _ _) = "<fun>"
 	show (VList t) = "[" ++ intercalate "," (Prelude.map show t) ++ "]"
 	show v@(VTuple a b) = "{" ++ intercalate "," list ++ "}"
 		where list = Prelude.map show $ tuple2List v
@@ -47,8 +47,14 @@ lookFor (env, st) id = case Data.Map.lookup id env of
 		Nothing -> case id of
 			Ident name -> fail $ "wrong location: " ++ (show loc) ++ " while performing search of " ++ name
 	Nothing -> case id of
-		Ident name -> fail $ (show name) ++ " not defined " ++ (showTree env)
+		Ident name -> fail $ (show name) ++ " not defined " ++ (showTree env) ++ "Sore: " ++ (showTree st)
 
+
+emptyEnv = Data.Map.empty
+emptyStore = Data.Map.empty
+
+emptyES :: (Env, Store)
+emptyES = (emptyEnv, emptyStore)
 
 ienv :: Env -> Ident -> Loc -> Env
 ienv env id loc = Data.Map.insert id loc env
